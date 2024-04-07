@@ -174,15 +174,12 @@
 <!-- Edit Item Form -->
 <div id="edit-item-form" style="display: none;">
     <form onsubmit="submitEditItem(); return false;" style="display: flex; flex-direction: column; max-width: 500px; margin: auto;">
-        <!-- <label for="edit-item-name" style="margin-bottom: 10px;">Item Name:</label>
-        <input type="text" id="edit-item-name" name="edit-item-name" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;"> -->
         <label for="edit-item-price" style="margin-bottom: 10px;">Item Price:</label>
         <input type="text" id="edit-item-price" name="edit-item-price" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;">
         <label for="edit-item-description" style="margin-bottom: 10px;">Item Description:</label>
         <textarea id="edit-item-description" name="edit-item-description" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;"></textarea>
-        <!-- <label for="edit-item-image" style="margin-bottom: 10px;">Item Image:</label>
-        <input type="file" id="edit-item-image" name="edit-item-image" style="margin-bottom: 20px;"> -->
         <input type="submit" value="Submit" style="padding: 10px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer;">
+        <input onclick="cancelEdit()" type="submit" value="Cancel" style="padding: 10px; border: none; border-radius: 5px; background-color: #af4c4c; color: white; cursor: pointer; margin-top: 5px;">
     </form>
 </div>
 </body>
@@ -336,11 +333,17 @@
                 edititemname.textContent = 'Edit the Item ' + '"' + itemName + '"';
                 document.getElementById('edit-item-form').insertBefore(edititemname, document.getElementById('edit-item-form').firstChild);
 
+                // Remove the edititemname element after the form is submitted
+                document.getElementById('edit-item-form').addEventListener('submit', function() {
+                    edititemname.remove();
+                });
+
                 document.getElementById('edit-item-price').value = itemData.price;
                 document.getElementById('edit-item-description').value = itemData.description;
 
                 // Show the form
                 document.getElementById('edit-item-form').style.display = 'block';
+                edititemname.remove();
             }
         });
     }   
@@ -358,7 +361,7 @@
             price: itemPrice,
             description: itemDescription,
         }).then(function() {
-            alert('Item updated successfully!')
+            console.log('Item updated successfully!')
         }).catch(function(error) {
             console.log('Error updating item: ', error);
         });
@@ -367,12 +370,17 @@
             price: itemPrice,
             description: itemDescription,
         }).then(function() {
-            alert('Item updated successfully!')
+            console.log('Item updated successfully!')
         }).catch(function(error) {
             console.log('Error updating item: ', error);
         });
 
         // Hide the form
+        document.getElementById('edit-item-form').style.display = 'none';
+        document.getElementBy
+    }
+
+    function cancelEdit() {
         document.getElementById('edit-item-form').style.display = 'none';
     }
 </script>
