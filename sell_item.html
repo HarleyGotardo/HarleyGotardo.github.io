@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Shop</title>
+    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: #00abf0;
+            flex-direction: column;
+            border-radius: 20px;
+            width: 100vw;
+        }
+
+        .main input {
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 10px;
+            border: 1px solid #00abf0;
+            font-size: 1.5rem;
+            background: rgb(0, 0, 0);
+            color: white;
+        }
+
+        .main button {
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 10px;
+            border: 1px solid #00abf0;
+            font-size: 1.5rem;
+            background: rgb(0, 0, 0);
+            color: white;
+        }
+
+        .input-image {
+            width: 360px;
+        }
+
+        /* CSS */
+        .button-85 {
+        padding: 0.6em 2em;
+        border: none;
+        outline: none;
+        color: rgb(255, 255, 255);
+        background: #111;
+        cursor: pointer;
+        position: relative;
+        z-index: 0;
+        border-radius: 10px;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        }
+
+        .button-85:before {
+        content: "";
+        background: linear-gradient(
+            45deg,
+            #ff0000,
+            #ff7300,
+            #fffb00,
+            #48ff00,
+            #00ffd5,
+            #002bff,
+            #7a00ff,
+            #ff00c8,
+            #ff0000
+        );
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        background-size: 400%;
+        z-index: -1;
+        filter: blur(5px);
+        -webkit-filter: blur(5px);
+        width: calc(100% + 4px);
+        height: calc(100% + 4px);
+        animation: glowing-button-85 20s linear infinite;
+        transition: opacity 0.3s ease-in-out;
+        border-radius: 10px;
+        }
+
+        @keyframes glowing-button-85 {
+        0% {
+            background-position: 0 0;
+        }
+        50% {
+            background-position: 400% 0;
+        }
+        100% {
+            background-position: 0 0;
+        }
+        }
+
+        .button-85:after {
+        z-index: -1;
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: #222;
+        left: 0;
+        top: 0;
+        border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="fade" id="fade">
+    <header class="header">
+        <div class="">
+            <img src="img/favicon.png" alt="" class="fav">
+            <a href="home.html" class="logo">Secret Shop</a>
+        </div>
+
+        <nav class="navbar">
+            <a href="home.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="profile.html"  class="active">Profile</a>
+            <a href="shopping_cart.html"><img src="img/cart.png" alt=""></a>
+        </nav>
+    </header>
+
+    <div class="main">
+        <h1>
+            Sell an Item
+        </h1>
+        <input autocomplete="off" type="text" placeholder="Item Name" id="itemname" required>
+        <input autocomplete="off" type="number" placeholder="Price" id="price" required>
+        <input autocomplete="off" type="text" placeholder="Description" id="description" required>
+        <input autocomplete="off" type="file" id="itemImage" class="input-image" accept="image/png, image/jpeg" required>
+        <button class="button-85" role="button">Sell Item</button>
+    </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+<script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyC0zHqo7V3RZaHzMi6rsJlwYoRM-m9nc4o",
+        authDomain: "secretshop-4ad96.firebaseapp.com",
+        projectId: "secretshop-4ad96",
+        storageBucket: "secretshop-4ad96.appspot.com",
+        messagingSenderId: "103075038405",
+        appId: "1:103075038405:web:bce80b24a3fcfa79131cac",
+        measurementId: "G-9NSXTKRSDK"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    var storage = firebase.storage();
+    var database = firebase.database();
+
+
+    
+    function writeItemData(itemName, itemPrice, itemDescription, itemImage, user_email) {
+        var itemData = {
+            itemName: itemName,
+            price: itemPrice,
+            description: itemDescription,
+            user_email: user_email
+        };
+
+        var storageRef = storage.ref(user_email + '/' + itemName + '.jpg');
+        storageRef.put(itemImage).then(function(snapshot) {
+            snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                itemData.imageUrl = downloadURL;
+                // Replace '/' in the email with ',' to avoid Firebase path issues
+                var safeEmail = user_email.replace(/\./g, ',');
+                database.ref('users/' + safeEmail + '/items/' + itemName).set(itemData)
+                .then(() => alert('Data written to user items'))
+                .catch((error) => alert('Error writing to user items: ', error));
+                database.ref('items/' + itemName).set(itemData)
+                .then(() => alert('Data written to items'))
+                .catch((error) => alert('Error writing to items: ', error));
+            });
+        });
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            var user_email = user.email;
+                document.querySelector('.button-85').addEventListener('click', function() {
+                var itemName = document.getElementById('itemname').value;
+                var itemPrice = document.getElementById('price').value;
+                var itemDescription = document.getElementById('description').value;
+                var itemImage = document.getElementById('itemImage').files[0];
+
+                if (!itemName || !itemPrice || !itemDescription || !itemImage) {
+                    alert('Please fill out all fields');
+                    return;
+                }
+
+                writeItemData(itemName, itemPrice, itemDescription, itemImage, user_email);
+
+                // alert('Item has been successfully added!');
+                
+                document.getElementById('itemname').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('itemImage').value = '';
+    });
+        } else {
+            console.log('No user is signed in');
+        }
+    });
+</script>
+</html>

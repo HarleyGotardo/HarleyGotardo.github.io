@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Shop</title>
+    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-picture {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prof-pic {
+            display: flex;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            justify-content: center;
+            align-self: center;
+        }
+
+        #user-email {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #ffffff;
+        }
+
+        .logout {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background-color: #ac121254;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .sell-item {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+
+        }
+
+        .sell-item-btn {
+            background-color: #39ac1254;
+        }
+
+        .listed-items {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .listed-items2 {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .search-btn {
+            background-color: #ac74127d;
+        }
+
+        .shopnow-btn {
+            background-color: #12aca454;
+        }
+    </style>
+</head>
+<body class="fade" id="fade">
+    <header class="header">
+        <div class="">
+            <img src="img/favicon.png" alt="" class="fav">
+            <a href="home.html" class="logo">Secret Shop</a>
+        </div>
+
+        <nav class="navbar">
+            <a href="home.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="profile.html"  class="active">Profile</a>
+            <a href="shopping_cart.html"><img src="img/cart.png" alt=""></a>
+        </nav>
+    </header>
+
+    <div class="profile-picture">
+        <img src="img/profile.png" alt="" class="prof-pic" id="profile-picture">
+        <p id="user-email"></p>
+    </div>
+
+    <!-- <h1 style="">Sell Item</h1> -->
+
+    <div class="sell-item">
+        <a href="sell_item.html"><button class="sell-item-btn">Sell Item</button></a>
+    </div>
+
+    <div class="sell-item">
+        <a href="shop.html"><button class="shopnow-btn">Shop now</button></a>
+    </div>
+
+    <div class="logout"> 
+        <button class="log-out-btn" onclick="logout()">Logout</button>
+    </div>
+    <div class="listed-items">
+        <h1>Items that you sell: </h1>  
+        <div id="user-items" class="listed-items2"></div>
+        <div style="margin-top: 50px;" class="search-item-to-delete">
+            <h1>Search item to edit or delete: </h1>
+            <input autocomplete="off" type="text" id="search-item" placeholder="Search item">
+            <button class="search-btn" onclick="editItem()">Edit</button>
+            <input autocomplete="off" type="text" id="search-item" placeholder="Search item">
+            <button class="search-btn" onclick="deleteItem()">Delete</button>
+        </div>
+    </div>
+
+<!-- Edit Item Form -->
+<div id="edit-item-form" style="display: none;">
+    <form onsubmit="submitEditItem(); return false;" style="display: flex; flex-direction: column; max-width: 500px; margin: auto;">
+        <!-- <label for="edit-item-name" style="margin-bottom: 10px;">Item Name:</label>
+        <input type="text" id="edit-item-name" name="edit-item-name" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;"> -->
+        <label for="edit-item-price" style="margin-bottom: 10px;">Item Price:</label>
+        <input type="text" id="edit-item-price" name="edit-item-price" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;">
+        <label for="edit-item-description" style="margin-bottom: 10px;">Item Description:</label>
+        <textarea id="edit-item-description" name="edit-item-description" style="margin-bottom: 20px; padding: 10px; border: none; border-radius: 5px;"></textarea>
+        <!-- <label for="edit-item-image" style="margin-bottom: 10px;">Item Image:</label>
+        <input type="file" id="edit-item-image" name="edit-item-image" style="margin-bottom: 20px;"> -->
+        <input type="submit" value="Submit" style="padding: 10px; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer;">
+    </form>
+</div>
+</body>
+
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC0zHqo7V3RZaHzMi6rsJlwYoRM-m9nc4o",
+        authDomain: "secretshop-4ad96.firebaseapp.com",
+        projectId: "secretshop-4ad96",
+        storageBucket: "secretshop-4ad96.appspot.com",
+        messagingSenderId: "103075038405",
+        appId: "1:103075038405:web:bce80b24a3fcfa79131cac",
+        measurementId: "G-9NSXTKRSDK"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Declare safeEmail outside of the onAuthStateChanged callback
+    var safeEmail;
+    var email;
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            document.getElementById('user-email').textContent = user.email;
+            email = user.email;
+            // Assign a value to safeEmail
+            safeEmail = user.email.replace(/\./g, ',');
+
+            // Get a reference to the user's items in the database
+            var userItemsRef = firebase.database().ref('users/' + safeEmail + '/items');
+
+            // Listen for changes to the user's items
+            userItemsRef.on('value', function(snapshot) {
+                // Get the user's items from the snapshot
+                var userItems = snapshot.val();
+
+                // Get a reference to the div where the user's items will be displayed
+                var userItemsDiv = document.getElementById('user-items');
+
+                // Clear the div
+                userItemsDiv.innerHTML = '';
+
+                // Loop through the user's items
+                for (var itemName in userItems) {
+                    // Create a new div for the item
+                    var itemDiv = document.createElement('div');
+
+                    // Create an img element for the item image
+                    var img = document.createElement('img');
+                    img.src = userItems[itemName].imageUrl;
+                    img.style.width = '100px'; // Set the width of the image
+                    img.style.height = '100px'; // Set the height of the image
+                    img.style.borderRadius = '20%'; // Make the image round
+                    img.style.margin = '10px'; // Add some margin around the image
+
+                    // Set the text of the div to the item's name and price
+                    var text = document.createElement('p');
+                    text.textContent = itemName + ': ' + "₱ " + userItems[itemName].price;
+
+                    // Add the img and text to the itemDiv
+                    itemDiv.appendChild(img);
+                    itemDiv.appendChild(text);
+
+                    // Add the div to the userItemsDiv
+                    userItemsDiv.appendChild(itemDiv);
+                }
+            });
+        } else {
+            console.log('No user is signed in');
+        }
+    });
+
+    function logout() {
+        var confirmation = confirm("Are you sure you want to log out?");
+        if (confirmation) {
+            firebase.auth().signOut().then(() => {
+                console.log('User signed out');
+                window.location.href = "index.html"; // redirect to login page after successful logout
+            }).catch((error) => {
+                console.error('Sign out error', error);
+            });
+        }
+    }
+
+    function deleteItem() {
+        var itemName = document.getElementById('search-item').value;
+        
+        var userItemsRef = firebase.database().ref('users/' + safeEmail + '/items/' + itemName);
+        var itemsRef = firebase.database().ref('items/' + itemName);
+
+        // Get the item data to find the image extension
+        userItemsRef.once('value').then(function(snapshot) {
+            var itemData = snapshot.val();
+            if (itemData) {
+                var imageExtension = itemData.imageExtension;
+
+                // Create a reference to the image to delete
+                var storageRef = firebase.storage().ref(email + '/' + itemName + '.' + '.jpg');
+
+                // Delete the image
+                storageRef.delete().then(function() {
+                    // Image deleted successfully
+                    console.log('Image deleted successfully');
+                }).catch(function(error) {
+                    // An error occurred
+                    console.error('Error deleting image: ', error);
+                });
+            }
+        });
+
+        // Delete the item data
+        userItemsRef.remove();
+        itemsRef.remove()
+        .then(function() {
+            alert('Item deleted successfully!')
+        })
+        .catch(function(error) {
+            console.log('Error deleting item: ', error);
+        });
+    }
+    var itemName;
+
+    // Update the item name when the user searches for it
+    function editItem() {
+        itemName = document.getElementById('search-item').value;
+        var userItemsRef = firebase.database().ref('users/' + safeEmail + '/items/' + itemName);
+        var userItemsRef2 = firebase.database().ref('items/' + itemName);
+
+        // Get the current item data
+        userItemsRef.once('value').then(function(snapshot) {
+            var itemData = snapshot.val();
+            if (itemData) {
+                // Display the current item data in an editable form
+                // This assumes you have a form with id 'edit-item-form' and input fields with ids 'edit-item-name' and 'edit-item-price'
+
+                var edititemname = document.createElement('h1');
+                edititemname.style.textAlign = 'center';
+                edititemname.textContent = 'Edit the Item ' + '"' + itemName + '"';
+                document.getElementById('edit-item-form').insertBefore(edititemname, document.getElementById('edit-item-form').firstChild);
+
+                document.getElementById('edit-item-price').value = itemData.price;
+                document.getElementById('edit-item-description').value = itemData.description;
+
+                // Show the form
+                document.getElementById('edit-item-form').style.display = 'block';
+            }
+        });
+    }   
+
+    // This function should be called when the user submits the edit item form
+    function submitEditItem() {
+        var itemPrice = document.getElementById('edit-item-price').value;
+        var itemDescription = document.getElementById('edit-item-description').value;
+
+        var userItemsRef = firebase.database().ref('users/' + safeEmail + '/items/' + itemName);
+        var userItemsRef2 = firebase.database().ref('items/' + itemName);
+
+        // Update the item data in the database
+        userItemsRef2.update({
+            price: itemPrice,
+            description: itemDescription,
+        }).then(function() {
+            alert('Item updated successfully!')
+        }).catch(function(error) {
+            console.log('Error updating item: ', error);
+        });
+
+        userItemsRef.update({
+            price: itemPrice,
+            description: itemDescription,
+        }).then(function() {
+            alert('Item updated successfully!')
+        }).catch(function(error) {
+            console.log('Error updating item: ', error);
+        });
+
+        // Hide the form
+        document.getElementById('edit-item-form').style.display = 'none';
+    }
+</script>
+</html>

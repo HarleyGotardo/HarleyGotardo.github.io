@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Shop</title>
+    <link rel="shortcut icon" href="img/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* Three equal-width columns */
+            gap: 10px; /* Gap between columns */
+        }
+
+        .column {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .item {
+            /* border: 1px solid #ccc; */
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        .item img {
+            width: 100%;
+        }
+
+        .item h2 {
+            font-size: 20px;
+        }
+
+        .item p {
+            font-size: 18px;
+        }
+
+        .item img {
+            width: 300px;
+            height: 300px;
+            border-radius: 30px;
+        }
+        button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background-color: #125dac54;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body class="fade" id="fade">
+    <header class="header">
+        <div class="">
+            <img src="img/favicon.png" alt="" class="fav">
+            <a href="#" class="logo">Secret Shop</a>
+        </div>
+
+        <nav class="navbar">
+            <a href="home.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="profile.html">Profile</a>
+            <a href="shopping_cart.html"><img src="img/cart.png" alt=""></a>
+        </nav>
+    </header>
+    
+    <div class="grid-container">
+        <div class="column">
+            <div class="item">
+            </div>
+
+            <div class="item">
+
+            </div>
+            <!-- More items... -->
+        </div>
+
+        <div class="column">
+            <div class="item">
+
+            </div>
+
+            <div class="item">
+
+            </div>
+
+            <div class="item">
+            </div>
+
+            <!-- More items... -->
+        </div>
+
+        <div class="column">
+            <div class="item">
+
+            </div>
+
+            <div class="item">
+
+            </div>
+            <!-- More items... -->
+        </div>
+    </div>
+
+    <footer class="footer" style="text-align: center;">
+        <p>&copy; 2024 Secret Shop. All rights reserved.</p>
+    </footer>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+<script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+        apiKey: "AIzaSyC0zHqo7V3RZaHzMi6rsJlwYoRM-m9nc4o",
+        authDomain: "secretshop-4ad96.firebaseapp.com",
+        projectId: "secretshop-4ad96",
+        storageBucket: "secretshop-4ad96.appspot.com",
+        messagingSenderId: "103075038405",
+        appId: "1:103075038405:web:bce80b24a3fcfa79131cac",
+        measurementId: "G-9NSXTKRSDK"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+
+    // Get a reference to the items in the database
+    var itemsRef = database.ref('items');
+
+    // Listen for changes to the items data
+    itemsRef.on('value', function(snapshot) {
+        var items = snapshot.val();
+
+        // Clear the grid container
+        var gridContainer = document.querySelector('.grid-container');
+        gridContainer.innerHTML = '';
+
+        // Loop through the items and create HTML elements for each one
+        for (var itemName in items) {
+            var item = items[itemName];
+
+            // Create a new column div
+            var columnDiv = document.createElement('div');
+            columnDiv.className = 'column';
+
+            // Create a new item div
+            var itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+
+            // Create an img element for the item image
+            var img = document.createElement('img');
+            img.src = item.imageUrl;
+
+            // Create a h2 element for the item name
+            var h2 = document.createElement('h2');
+            h2.textContent = itemName;
+
+            // Create a p element for the item price
+            var p = document.createElement('a');
+            p.textContent = '₱' + item.price + '.00';
+
+            // Create a p element for the item description
+            var d = document.createElement('p');
+            d.textContent = "Item Description: " + item.description;
+
+            var d2 = document.createElement('p');
+            d2.textContent = "Seller: " + item.user_email;
+
+            var addtocart = document.createElement('button');
+            addtocart.textContent = 'Add to Cart';
+
+            // Append the img, h2, p, and d elements to the item div
+            itemDiv.appendChild(img);
+            itemDiv.appendChild(h2);
+            itemDiv.appendChild(p);
+            itemDiv.appendChild(d);
+            itemDiv.appendChild(d2);
+            itemDiv.appendChild(addtocart);
+
+            // Append the item div to the column div
+            columnDiv.appendChild(itemDiv);
+
+            // Append the column div to the grid container
+            gridContainer.appendChild(columnDiv);
+        }
+    });
+</script>
+</html>
