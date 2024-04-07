@@ -76,6 +76,52 @@
         .shopnow-btn {
             background-color: #12aca454;
         }
+        .item-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .item-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .item-price {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+        }
+
+        .options {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .options div {
+            margin: 0 10px;
+        }
     </style>
 </head>
 <body class="fade" id="fade">
@@ -99,7 +145,7 @@
     </div>
 
     <!-- <h1 style="">Sell Item</h1> -->
-
+<div class="options">
     <div class="sell-item">
         <a href="sell_item.html"><button class="sell-item-btn">Sell Item</button></a>
     </div>
@@ -111,11 +157,13 @@
     <div class="logout"> 
         <button class="log-out-btn" onclick="logout()">Logout</button>
     </div>
+</div>
+
     <div class="listed-items">
-        <h1>Items that you sell: </h1>  
+        <h1>Items that you sell:</h1>
         <div id="user-items" class="listed-items2"></div>
         <div style="margin-top: 50px;" class="search-item-to-delete">
-            <h1>Search item to edit or delete: </h1>
+            <h1>Search item to edit or delete:</h1>
             <input autocomplete="off" type="text" id="search-item" placeholder="Search item">
             <button class="search-btn" onclick="editItem()">Edit</button>
             <input autocomplete="off" type="text" id="search-item" placeholder="Search item">
@@ -182,28 +230,30 @@
 
                 // Loop through the user's items
                 for (var itemName in userItems) {
-                    // Create a new div for the item
-                    var itemDiv = document.createElement('div');
+                    var item = userItems[itemName];
+                    var itemCard = document.createElement('div');
+                    itemCard.classList.add('item-card');
+                    itemCard.style.backgroundColor = 'white';
 
-                    // Create an img element for the item image
                     var img = document.createElement('img');
-                    img.src = userItems[itemName].imageUrl;
-                    img.style.width = '100px'; // Set the width of the image
-                    img.style.height = '100px'; // Set the height of the image
-                    img.style.borderRadius = '20%'; // Make the image round
-                    img.style.margin = '10px'; // Add some margin around the image
+                    img.classList.add('item-img');
+                    img.src = item.imageUrl;
 
-                    // Set the text of the div to the item's name and price
-                    var text = document.createElement('p');
-                    text.textContent = itemName + ': ' + "₱ " + userItems[itemName].price;
+                    var itemNameElem = document.createElement('p');
+                    itemNameElem.style.color = 'black'
+                    itemNameElem.classList.add('item-name');
+                    itemNameElem.textContent = itemName;
 
-                    // Add the img and text to the itemDiv
-                    itemDiv.appendChild(img);
-                    itemDiv.appendChild(text);
+                    var itemPriceElem = document.createElement('p');
+                    itemPriceElem.classList.add('item-price');
+                    itemPriceElem.textContent = "₱ " + item.price;
 
-                    // Add the div to the userItemsDiv
-                    userItemsDiv.appendChild(itemDiv);
-                }
+                    itemCard.appendChild(img);
+                    itemCard.appendChild(itemNameElem);
+                    itemCard.appendChild(itemPriceElem);
+
+                    userItemsDiv.appendChild(itemCard);
+        }
             });
         } else {
             console.log('No user is signed in');
@@ -228,6 +278,10 @@
         var userItemsRef = firebase.database().ref('users/' + safeEmail + '/items/' + itemName);
         var itemsRef = firebase.database().ref('items/' + itemName);
 
+        if (itemName == "") {
+            alert('Please input an item name');
+            return;
+        }
         // Get the item data to find the image extension
         userItemsRef.once('value').then(function(snapshot) {
             var itemData = snapshot.val();
@@ -267,6 +321,10 @@
         var userItemsRef2 = firebase.database().ref('items/' + itemName);
 
         // Get the current item data
+        if(itemName == "") {
+            alert('Please input an item name');
+            return;
+        }
         userItemsRef.once('value').then(function(snapshot) {
             var itemData = snapshot.val();
             if (itemData) {
